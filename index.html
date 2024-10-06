@@ -3,116 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Booking Website</title>
+    <title>SkyBooker - Flight Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
         .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
+
         header {
-            background: #35424a;
+            background: var(--primary-color);
             color: white;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #e8491d 3px solid;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         header h1 {
-            margin: 0;
+            font-size: 2rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style-type: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--accent-color);
+        }
+
+        .hero {
+            background-image: url('https://source.unsplash.com/1600x900/?airplane,sky');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            color: white;
+            position: relative;
         }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .hero-content {
+            z-index: 1;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
         .search-form {
-            background: #fff;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
         }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            flex: 1;
+            margin-right: 1rem;
         }
+
+        .form-group:last-child {
+            margin-right: 0;
+        }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
         }
-        .form-group input, .form-group select {
+
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 8px;
+            padding: 0.75rem;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 1rem;
         }
+
         button {
             display: block;
             width: 100%;
-            padding: 10px;
-            background: #e8491d;
-            color: #fff;
+            padding: 1rem;
+            background: var(--accent-color);
+            color: white;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #333;
-        }
-        #results {
-            margin-top: 20px;
-            background: #fff;
-            padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
+        button:hover {
+            background: #c0392b;
+        }
+
+        #results {
+            margin-top: 2rem;
+        }
+
         .flight {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
         }
-        .flight:last-child {
-            border-bottom: none;
+
+        .flight:hover {
+            transform: translateY(-5px);
+        }
+
+        .flight h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .flight-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flight-time, .flight-price {
+            text-align: center;
+        }
+
+        .flight-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        footer {
+            background: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Flight Booking</h1>
+            <h1><i class="fas fa-plane"></i> SkyBooker</h1>
+            <nav>
+                <ul>
+                    <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Find Your Perfect Flight</h2>
+            <p>Discover amazing deals on flights to destinations worldwide</p>
+        </div>
+    </section>
+
     <div class="container">
         <form class="search-form" id="search-form">
-            <div class="form-group">
-                <label for="from">From:</label>
-                <input type="text" id="from" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="from"><i class="fas fa-plane-departure"></i> From:</label>
+                    <input type="text" id="from" required placeholder="City or Airport">
+                </div>
+                <div class="form-group">
+                    <label for="to"><i class="fas fa-plane-arrival"></i> To:</label>
+                    <input type="text" id="to" required placeholder="City or Airport">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="to">To:</label>
-                <input type="text" id="to" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date"><i class="far fa-calendar-alt"></i> Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="passengers"><i class="fas fa-users"></i> Passengers:</label>
+                    <select id="passengers">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="date">Date:</label>
-                <input type="date" id="date" required>
-            </div>
-            <div class="form-group">
-                <label for="passengers">Passengers:</label>
-                <select id="passengers">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                </select>
-            </div>
-            <button type="submit">Search Flights</button>
+            <button type="submit"><i class="fas fa-search"></i> Search Flights</button>
         </form>
 
         <div id="results"></div>
     </div>
+
+    <footer>
+        <p>&copy; 2023 SkyBooker. All rights reserved.</p>
+    </footer>
 
     <script>
         document.getElementById('search-form').addEventListener('submit', function(e) {
@@ -127,9 +280,9 @@
             // and receive actual flight results. For this example, we'll
             // just create some dummy results.
             const dummyFlights = [
-                { airline: 'AirDev', departure: '08:00', arrival: '10:00', price: 199 },
-                { airline: 'CodeAir', departure: '10:30', arrival: '12:30', price: 180 },
-                { airline: 'JavaJet', departure: '14:00', arrival: '16:00', price: 210 }
+                { airline: 'SkyHigh Airlines', departure: '08:00', arrival: '10:00', price: 199 },
+                { airline: 'CloudCruiser', departure: '10:30', arrival: '12:30', price: 180 },
+                { airline: 'AirDream', departure: '14:00', arrival: '16:00', price: 210 }
             ];
 
             let resultsHtml = `<h2>Flights from ${from} to ${to} on ${date} for ${passengers} passenger(s):</h2>`;
@@ -138,8 +291,16 @@
                 resultsHtml += `
                     <div class="flight">
                         <h3>${flight.airline}</h3>
-                        <p>Departure: ${flight.departure} - Arrival: ${flight.arrival}</p>
-                        <p>Price: $${flight.price}</p>
+                        <div class="flight-info">
+                            <div class="flight-time">
+                                <p><i class="fas fa-plane-departure"></i> ${flight.departure}</p>
+                                <p><i class="fas fa-plane-arrival"></i> ${flight.arrival}</p>
+                            </div>
+                            <div class="flight-price">
+                                <p>$${flight.price}</p>
+                                <button>Book Now</button>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
