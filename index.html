@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        header {
+            background: #35424a;
+            color: white;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #e8491d 3px solid;
+        }
+        header h1 {
+            margin: 0;
+            text-align: center;
+        }
+        .search-form {
+            background: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #e8491d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #333;
+        }
+        #results {
+            margin-top: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .flight {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .flight:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Flight Booking</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <form class="search-form" id="search-form">
+            <div class="form-group">
+                <label for="from">From:</label>
+                <input type="text" id="from" required>
+            </div>
+            <div class="form-group">
+                <label for="to">To:</label>
+                <input type="text" id="to" required>
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+            </div>
+            <div class="form-group">
+                <label for="passengers">Passengers:</label>
+                <select id="passengers">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <button type="submit">Search Flights</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('search-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            const date = document.getElementById('date').value;
+            const passengers = document.getElementById('passengers').value;
+
+            // In a real application, you would send this data to a server
+            // and receive actual flight results. For this example, we'll
+            // just create some dummy results.
+            const dummyFlights = [
+                { airline: 'AirDev', departure: '08:00', arrival: '10:00', price: 199 },
+                { airline: 'CodeAir', departure: '10:30', arrival: '12:30', price: 180 },
+                { airline: 'JavaJet', departure: '14:00', arrival: '16:00', price: 210 }
+            ];
+
+            let resultsHtml = `<h2>Flights from ${from} to ${to} on ${date} for ${passengers} passenger(s):</h2>`;
+
+            dummyFlights.forEach(flight => {
+                resultsHtml += `
+                    <div class="flight">
+                        <h3>${flight.airline}</h3>
+                        <p>Departure: ${flight.departure} - Arrival: ${flight.arrival}</p>
+                        <p>Price: $${flight.price}</p>
+                    </div>
+                `;
+            });
+
+            document.getElementById('results').innerHTML = resultsHtml;
+        });
+    </script>
+</body>
+</html>
