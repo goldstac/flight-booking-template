@@ -116,13 +116,15 @@
 
         .form-row {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             margin-bottom: 1rem;
         }
 
         .form-group {
-            flex: 1;
+            flex: 1 1 200px;
             margin-right: 1rem;
+            margin-bottom: 1rem;
         }
 
         .form-group:last-child {
@@ -186,12 +188,15 @@
 
         .flight-info {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
         }
 
         .flight-time, .flight-price {
             text-align: center;
+            flex: 1 1 150px;
+            margin-bottom: 1rem;
         }
 
         .flight-price {
@@ -206,6 +211,92 @@
             text-align: center;
             padding: 1rem 0;
             margin-top: 2rem;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                margin-top: -30px;
+                padding: 1rem;
+            }
+
+            .form-group {
+                flex: 1 1 100%;
+                margin-right: 0;
+            }
+
+            .flight-info {
+                flex-direction: column;
+            }
+
+            .flight-time, .flight-price {
+                flex: 1 1 100%;
+            }
         }
     </style>
 </head>
@@ -244,8 +335,12 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="date"><i class="far fa-calendar-alt"></i> Date:</label>
-                    <input type="date" id="date" required>
+                    <label for="departure-date"><i class="far fa-calendar-alt"></i> Departure Date:</label>
+                    <input type="date" id="departure-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="return-date"><i class="far fa-calendar-alt"></i> Return Date:</label>
+                    <input type="date" id="return-date">
                 </div>
                 <div class="form-group">
                     <label for="passengers"><i class="fas fa-users"></i> Passengers:</label>
@@ -260,7 +355,22 @@
             <button type="submit"><i class="fas fa-search"></i> Search Flights</button>
         </form>
 
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Searching for flights...</p>
+        </div>
+
         <div id="results"></div>
+    </div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Booking Confirmation</h2>
+            <p>Your flight has been booked successfully!</p>
+            <p>Booking details:</p>
+            <div id="bookingDetails"></div>
+        </div>
     </div>
 
     <footer>
@@ -268,26 +378,61 @@
     </footer>
 
     <script>
-        document.getElementById('search-form').addEventListener('submit', function(e) {
+        const searchForm = document.getElementById('search-form');
+        const loadingElement = document.getElementById('loading');
+        const resultsElement = document.getElementById('results');
+        const modal = document.getElementById('bookingModal');
+        const closeModal = document.getElementsByClassName('close')[0];
+        const bookingDetails = document.getElementById('bookingDetails');
+
+        searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             const from = document.getElementById('from').value;
             const to = document.getElementById('to').value;
-            const date = document.getElementById('date').value;
+            const departureDate = document.getElementById('departure-date').value;
+            const returnDate = document.getElementById('return-date').value;
             const passengers = document.getElementById('passengers').value;
 
-            // In a real application, you would send this data to a server
-            // and receive actual flight results. For this example, we'll
-            // just create some dummy results.
-            const dummyFlights = [
-                { airline: 'SkyHigh Airlines', departure: '08:00', arrival: '10:00', price: 199 },
-                { airline: 'CloudCruiser', departure: '10:30', arrival: '12:30', price: 180 },
-                { airline: 'AirDream', departure: '14:00', arrival: '16:00', price: 210 }
-            ];
+            // Show loading spinner
+            loadingElement.style.display = 'block';
+            resultsElement.innerHTML = '';
 
-            let resultsHtml = `<h2>Flights from ${from} to ${to} on ${date} for ${passengers} passenger(s):</h2>`;
+            // Simulate API call with setTimeout
+            setTimeout(() => {
+                // Hide loading spinner
+                loadingElement.style.display = 'none';
 
-            dummyFlights.forEach(flight => {
+                // Generate dummy flight results
+                const dummyFlights = generateDummyFlights(from, to, departureDate, returnDate);
+                displayFlightResults(dummyFlights, passengers);
+            }, 2000);
+        });
+
+        function generateDummyFlights(from, to, departureDate, returnDate) {
+            const airlines = ['SkyHigh Airlines', 'CloudCruiser', 'AirDream', 'JetStream'];
+            const flights = [];
+
+            for (let i = 0; i < 5; i++) {
+                const departureTime = `${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+                const arrivalTime = `${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+                const price = Math.floor(Math.random() * (300 - 100 + 1) + 100);
+
+                flights.push({
+                    airline: airlines[Math.floor(Math.random() * airlines.length)],
+                    departure: departureTime,
+                    arrival: arrivalTime,
+                    price: price
+                });
+            }
+
+            return flights;
+        }
+
+        function displayFlightResults(flights, passengers) {
+            let resultsHtml = `<h2>Available Flights:</h2>`;
+
+            flights.forEach((flight, index) => {
                 resultsHtml += `
                     <div class="flight">
                         <h3>${flight.airline}</h3>
@@ -298,15 +443,44 @@
                             </div>
                             <div class="flight-price">
                                 <p>$${flight.price}</p>
-                                <button>Book Now</button>
+                                <button onclick="bookFlight(${index}, ${passengers})">Book Now</button>
                             </div>
                         </div>
                     </div>
                 `;
             });
 
-            document.getElementById('results').innerHTML = resultsHtml;
-        });
+            resultsElement.innerHTML = resultsHtml;
+        }
+
+        function bookFlight(flightIndex, passengers) {
+            const flight = resultsElement.querySelectorAll('.flight')[flightIndex];
+            const airline = flight.querySelector('h3').textContent;
+            const departureTime = flight.querySelector('.flight-time p:first-child').textContent;
+            const arrivalTime = flight.querySelector('.flight-time p:last-child').textContent;
+            const price = flight.querySelector('.flight-price p').textContent;
+
+            bookingDetails.innerHTML = `
+                <p><strong>Airline:</strong> ${airline}</p>
+                <p><strong>Departure:</strong> ${departureTime}</p>
+                <p><strong>Arrival:</strong> ${arrivalTime}</p>
+                <p><strong>Price:</strong> ${price}</p>
+                <p><strong>Passengers:</strong> ${passengers}</p>
+                <p><strong>Total:</strong> $${parseInt(price.slice(1)) * parseInt(passengers)}</p>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        closeModal.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
