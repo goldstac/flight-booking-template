@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyBooker - Flight Booking</title>
+    <title>SkyBooker - Complete Flight Booking</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
@@ -73,7 +73,7 @@
         }
 
         .hero {
-            background-image: url('https://source.unsplash.com/1600x900/?airplane,sky');
+            background-image: url('https://source.unsplash.com/1600x900/?airplane,airport');
             background-size: cover;
             background-position: center;
             height: 400px;
@@ -164,7 +164,7 @@
             background: #c0392b;
         }
 
-        #results {
+        #results, #booking-process {
             margin-top: 2rem;
         }
 
@@ -230,12 +230,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .modal {
@@ -256,7 +252,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 500px;
+            max-width: 600px;
             border-radius: 10px;
         }
 
@@ -273,6 +269,54 @@
             color: black;
             text-decoration: none;
             cursor: pointer;
+        }
+
+        .seat-map {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .seat {
+            padding: 10px;
+            text-align: center;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .seat.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .seat.occupied {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .meal-options {
+            margin-top: 20px;
+        }
+
+        .meal-option {
+            margin-bottom: 10px;
+        }
+
+        .passenger-details {
+            margin-top: 20px;
+        }
+
+        .passenger-form {
+            margin-bottom: 20px;
+        }
+
+        .checkout-summary {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
         }
 
         @media (max-width: 768px) {
@@ -296,6 +340,10 @@
 
             .flight-time, .flight-price {
                 flex: 1 1 100%;
+            }
+
+            .seat-map {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -361,16 +409,7 @@
         </div>
 
         <div id="results"></div>
-    </div>
-
-    <div id="bookingModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Booking Confirmation</h2>
-            <p>Your flight has been booked successfully!</p>
-            <p>Booking details:</p>
-            <div id="bookingDetails"></div>
-        </div>
+        <div id="booking-process"></div>
     </div>
 
     <footer>
@@ -381,9 +420,12 @@
         const searchForm = document.getElementById('search-form');
         const loadingElement = document.getElementById('loading');
         const resultsElement = document.getElementById('results');
-        const modal = document.getElementById('bookingModal');
-        const closeModal = document.getElementsByClassName('close')[0];
-        const bookingDetails = document.getElementById('bookingDetails');
+        const bookingProcessElement = document.getElementById('booking-process');
+
+        let selectedFlight = null;
+        let selectedSeats = [];
+        let selectedMeals = [];
+        let passengerDetails = [];
 
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -394,16 +436,12 @@
             const returnDate = document.getElementById('return-date').value;
             const passengers = document.getElementById('passengers').value;
 
-            // Show loading spinner
             loadingElement.style.display = 'block';
             resultsElement.innerHTML = '';
+            bookingProcessElement.innerHTML = '';
 
-            // Simulate API call with setTimeout
             setTimeout(() => {
-                // Hide loading spinner
                 loadingElement.style.display = 'none';
-
-                // Generate dummy flight results
                 const dummyFlights = generateDummyFlights(from, to, departureDate, returnDate);
                 displayFlightResults(dummyFlights, passengers);
             }, 2000);
@@ -443,7 +481,7 @@
                             </div>
                             <div class="flight-price">
                                 <p>$${flight.price}</p>
-                                <button onclick="bookFlight(${index}, ${passengers})">Book Now</button>
+                                <button onclick="selectFlight(${index}, ${passengers})">Select</button>
                             </div>
                         </div>
                     </div>
@@ -453,33 +491,144 @@
             resultsElement.innerHTML = resultsHtml;
         }
 
-        function bookFlight(flightIndex, passengers) {
-            const flight = resultsElement.querySelectorAll('.flight')[flightIndex];
-            const airline = flight.querySelector('h3').textContent;
-            const departureTime = flight.querySelector('.flight-time p:first-child').textContent;
-            const arrivalTime = flight.querySelector('.flight-time p:last-child').textContent;
-            const price = flight.querySelector('.flight-price p').textContent;
+        function selectFlight(flightIndex, passengers) {
+            selectedFlight = document.querySelectorAll('.flight')[flightIndex];
+            const airline = selectedFlight.querySelector('h3').textContent;
+            const departureTime = selectedFlight.querySelector('.flight-time p:first-child').textContent;
+            const arrivalTime = selectedFlight.querySelector('.flight-time p:last-child').textContent;
+            const price = selectedFlight.querySelector('.flight-price p').textContent;
 
-            bookingDetails.innerHTML = `
+            bookingProcessElement.innerHTML = `
+                <h2>Booking Process</h2>
+                <h3>Selected Flight:</h3>
                 <p><strong>Airline:</strong> ${airline}</p>
                 <p><strong>Departure:</strong> ${departureTime}</p>
                 <p><strong>Arrival:</strong> ${arrivalTime}</p>
                 <p><strong>Price:</strong> ${price}</p>
                 <p><strong>Passengers:</strong> ${passengers}</p>
-                <p><strong>Total:</strong> $${parseInt(price.slice(1)) * parseInt(passengers)}</p>
+
+                <h3>Select Seats:</h3>
+                <div class="seat-map" id="seat-map"></div>
+
+                <h3>Meal Options:</h3>
+                <div class="meal-options">
+                    <div class="meal-option">
+                        <input type="radio" id="meal-standard" name="meal" value="standard" checked>
+                        <label for="meal-standard">Standard Meal</label>
+                    </div>
+                    <div class="meal-option">
+                        <input type="radio" id="meal-vegetarian" name="meal" value="vegetarian">
+                        <label for="meal-vegetarian">Vegetarian Meal</label>
+                    </div>
+                    <div class="meal-option">
+                        <input type="radio" id="meal-kosher" name="meal" value="kosher">
+                        <label for="meal-kosher">Kosher Meal</label>
+                    </div>
+                </div>
+
+                <h3>Passenger Details:</h3>
+                <div id="passenger-forms"></div>
+
+                <button onclick="proceedToCheckout()">Proceed to Checkout</button>
             `;
 
-            modal.style.display = 'block';
+            generateSeatMap(passengers);
+            generatePassengerForms(passengers);
         }
 
-        closeModal.onclick = function() {
-            modal.style.display = 'none';
-        }
+        function generateSeatMap(passengers) {
+            const seatMap = document.getElementById('seat-map');
+            seatMap.innerHTML = '';
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            for (let i = 0; i < 30; i++) {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.textContent = String.fromCharCode(65 + Math.floor(i / 6)) + (i % 6 + 1);
+                seat.onclick = function() {
+                    if (this.classList.contains('occupied')) return;
+                    this.classList.toggle('selected');
+                    if (this.classList.contains('selected')) {
+                        selectedSeats.push(this.textContent);
+                        if (selectedSeats.length > passengers) {
+                            const removedSeat = selectedSeats.shift();
+                            document.querySelector(`.seat:not(.occupied):contains('${removedSeat}')`).classList.remove('selected');
+                        }
+                    } else {
+                        selectedSeats = selectedSeats.filter(s => s !== this.textContent);
+                    }
+                };
+                seatMap.appendChild(seat);
             }
+
+            // Randomly occupy some seats
+            const occupiedSeats = Math.floor(Math.random() * 10) + 5;
+            for (let i = 0; i < occupiedSeats; i++) {
+                const randomSeat = Math.floor(Math.random() * 30);
+                seatMap.children[randomSeat].classList.add('occupied');
+            }
+        }
+
+        function generatePassengerForms(passengers) {
+            const passengerForms = document.getElementById('passenger-forms');
+            passengerForms.innerHTML = '';
+
+            for (let i = 0; i < passengers; i++) {
+                passengerForms.innerHTML += `
+                    <div class="passenger-form">
+                        <h4>Passenger ${i + 1}</h4>
+                        <div class="form-group">
+                            <label for="passenger-name-${i}">Full Name:</label>
+                            <input type="text" id="passenger-name-${i}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="passenger-dob-${i}">Date of Birth:</label>
+                            <input type="date" id="passenger-dob-${i}" required>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function proceedToCheckout() {
+            const passengers = document.getElementById('passengers').value;
+            const mealChoice = document.querySelector('input[name="meal"]:checked').value;
+
+            passengerDetails = [];
+            for (let i = 0; i < passengers; i++) {
+                const name = document.getElementById(`passenger-name-${i}`).value;
+                const dob = document.getElementById(`passenger-dob-${i}`).value;
+                passengerDetails.push({ name, dob });
+            }
+
+            const totalPrice = parseInt(selectedFlight.querySelector('.flight-price p').textContent.slice(1)) * passengers;
+
+            bookingProcessElement.innerHTML = `
+                <h2>Checkout</h2>
+                <div class="checkout-summary">
+                    <h3>Booking Summary:</h3>
+                    <p><strong>Flight:</strong> ${selectedFlight.querySelector('h3').textContent}</p>
+                    <p><strong>Departure:</strong> ${selectedFlight.querySelector('.flight-time p:first-child').textContent}</p>
+                    <p><strong>Arrival:</strong> ${selectedFlight.querySelector('.flight-time p:last-child').textContent}</p>
+                    <p><strong>Passengers:</strong> ${passengers}</p>
+                    <p><strong>Seats:</strong> ${selectedSeats.join(', ')}</p>
+                    <p><strong>Meal Choice:</strong> ${mealChoice}</p>
+                    <h4>Passenger Details:</h4>
+                    ${passengerDetails.map((p, i) => `
+                        <p><strong>Passenger ${i + 1}:</strong> ${p.name} (DOB: ${p.dob})</p>
+                    `).join('')}
+                    <h3>Total Price: $${totalPrice}</h3>
+                </div>
+                <button onclick="confirmBooking()">Confirm Booking</button>
+            `;
+        }
+
+        function confirmBooking() {
+            bookingProcessElement.innerHTML = `
+                <h2>Booking Confirmed!</h2>
+                <p>Thank you for booking with SkyBooker. Your flight has been confirmed.</p>
+                <p>A confirmation email with your booking details has been sent to your email address.</p>
+                <button onclick="location.reload()">Book Another Flight</button>
+            `;
         }
     </script>
 </body>
