@@ -231,6 +231,27 @@
             border-bottom-right-radius: 50% 100%;
         }
 
+        .airplane-wings {
+            position: absolute;
+            width: 120%;
+            height: 30px;
+            background-color: #d0d0d0;
+            top: 50%;
+            left: -10%;
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+
+        .airplane-tail {
+            position: absolute;
+            width: 20%;
+            height: 60px;
+            background-color: #d0d0d0;
+            top: -30px;
+            right: -10%;
+            transform: skew(-30deg);
+        }
+
         .seat-map {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -260,19 +281,12 @@
             cursor: not-allowed;
         }
 
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .aisle {
+            grid-column: 3 / span 2;
+            text-align: center;
+            padding: 5px 0;
+            font-weight: bold;
+            color: #666;
         }
 
         @media (max-width: 768px) {
@@ -344,6 +358,8 @@
             <h2>Select Your Seats</h2>
             <div class="airplane-diagram">
                 <div class="airplane-body">
+                    <div class="airplane-wings"></div>
+                    <div class="airplane-tail"></div>
                     <div class="seat-map" id="seat-map"></div>
                 </div>
             </div>
@@ -483,6 +499,13 @@
             seatMap.innerHTML = '';
 
             for (let i = 0; i < 30; i++) {
+                if (i % 6 === 3) {
+                    const aisle = document.createElement('div');
+                    aisle.classList.add('aisle');
+                    aisle.textContent = 'Aisle';
+                    seatMap.appendChild(aisle);
+                }
+
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
                 seat.textContent = String.fromCharCode(65 + Math.floor(i / 6)) + (i % 6 + 1);
